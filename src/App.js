@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { ConnectWallet } from "./components/ConnectWallet";
+import AccountInfo from "./components/AccountInfo";
 import { ethers } from "ethers";
 import {
   GUARDBUSD_AC_ABI,
@@ -77,6 +79,12 @@ const App = () => {
     });
   };
 
+  window.ethereum.on("chainChanged", (chainID) => {
+    setCurrentNetwork(Number(chainID));
+    console.log("Network Changed", Number(chainID));
+    console.log(hexValue(chainID));
+  });
+
   useEffect(() => {
     checkIfWalletIsConnected();
   }, []);
@@ -87,38 +95,21 @@ const App = () => {
     updateCurrentNetwork(provider);
   }, [currentAccount, setCurrentAccount]);
 
-  window.ethereum.on("chainChanged", (chainID) => {
-    setCurrentNetwork(Number(chainID));
-    console.log("Network Changed", Number(chainID));
-    console.log(hexValue(chainID));
-  });
-
   return (
     <div className="App">
       <h1>Kings Armory</h1>
-      {/* {If there is no currentAccont render this button} */}
-      {!currentAccount ? (
-        <button className="connectButton" onClick={connectWallet}>
-          Connect Wallet
-        </button>
-      ) : (
-        <button className="connectButton connected" onClick={disconnectWallet}>
-          Disconnect Wallet
-        </button>
-      )}
-      {/* {Render different notification based on current connected chainID} */}
-      <p>Your account is: {currentAccount}</p>
-      {currentNetwork === 56 ? (
-        <p>You are connected to the Smart Chain with ID# {currentNetwork}</p>
-      ) : (
-        <p>
-          You are not connected to the Smart Chain. Click
-          <button href="#" onClick={promptSwitchToSmartChain}>
-            <span> here </span>
-          </button>
-          to switch networks. [ChainID: {currentNetwork}]
-        </p>
-      )}
+
+      <ConnectWallet
+        currentAccount={currentAccount}
+        connectWallet={connectWallet}
+        disconnectWallet={disconnectWallet}
+      />
+
+      <AccountInfo
+        currentAccount={currentAccount}
+        currentNetwork={currentNetwork}
+        promptSwitchToSmartChain={promptSwitchToSmartChain}
+      />
     </div>
   );
 };
