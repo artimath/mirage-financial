@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { ConnectWallet } from "./components/ConnectWallet";
 import AccountInfo from "./components/AccountInfo";
+import CompounderAccountData from "./components/CompounderAccountData";
 import { ethers } from "ethers";
 import {
   GUARDBUSD_AC_ABI,
@@ -11,10 +12,16 @@ import { hexValue } from "ethers/lib/utils";
 
 const App = () => {
   const [currentAccount, setCurrentAccount] = useState();
-  const [balance, setBalance] = useState();
   const [currentNetwork, setCurrentNetwork] = useState();
   const [provider, setProvider] = useState();
   const smartChainID = 56;
+  const secureWallet = "0x1D601351FA016014D47EB215D76cF2F28f1CCC75";
+
+  const guardBusdContract = new ethers.Contract(
+    GUARDBUSD_AC_ADDRESS,
+    GUARDBUSD_AC_ABI,
+    provider
+  );
 
   const checkIfWalletIsConnected = async () => {
     // Make sure we have access to window.ethereum
@@ -104,11 +111,17 @@ const App = () => {
         connectWallet={connectWallet}
         disconnectWallet={disconnectWallet}
       />
-
+      <hr />
       <AccountInfo
         currentAccount={currentAccount}
         currentNetwork={currentNetwork}
         promptSwitchToSmartChain={promptSwitchToSmartChain}
+      />
+      <hr />
+      <CompounderAccountData
+        contract={guardBusdContract}
+        walletAddress={currentAccount}
+        provider={provider}
       />
     </div>
   );

@@ -5,7 +5,7 @@ const AccountInfo = (props) => {
   return (
     <div>
       {/* Render different notification based on current connected chainID */}
-      <p>Your account is: {currentAccount}</p>;
+      <p>Your account is: {currentAccount}</p>
       {currentNetwork === 56 ? (
         <p>You are connected to the Smart Chain with ID# {currentNetwork}</p>
       ) : (
@@ -17,7 +17,6 @@ const AccountInfo = (props) => {
           to switch networks. [ChainID: {currentNetwork}]
         </p>
       )}
-      ;
     </div>
   );
 };
