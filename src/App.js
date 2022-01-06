@@ -14,9 +14,9 @@ const App = () => {
   const [currentAccount, setCurrentAccount] = useState();
   const [currentNetwork, setCurrentNetwork] = useState();
   const [provider, setProvider] = useState();
-  const smartChainID = 56;
-  const secureWallet = "0x1D601351FA016014D47EB215D76cF2F28f1CCC75";
+  const smartChainID = 56; // Binance smart chain
 
+  // Define the guardBUSD vault contract as an object
   const guardBusdContract = new ethers.Contract(
     GUARDBUSD_AC_ADDRESS,
     GUARDBUSD_AC_ABI,
@@ -35,9 +35,11 @@ const App = () => {
       } else {
         console.log("We have the ethereum object.");
       }
-
+      // request a list of connected accounts from metamask
+      // if no wallet connected, metamask prompts browser to connect
       const accounts = await ethereum.request({ method: "eth_accounts" });
 
+      // if any accounts found, log to console and set account to component state
       if (accounts.length !== 0) {
         const account = accounts[0];
         console.log("Found authorized account:", account);
@@ -51,6 +53,7 @@ const App = () => {
   };
 
   const connectWallet = async () => {
+    // check if metamask is providing the ethereum object
     try {
       const { ethereum } = window;
 
@@ -58,6 +61,8 @@ const App = () => {
         alert("Get MetaMask!");
         return;
       } else {
+        // request a list of connected accounts from metamask
+        // if no wallet connected, metamask prompts browser to connect
         const accounts = await ethereum.request({
           method: "eth_requestAccounts",
         });
@@ -71,21 +76,26 @@ const App = () => {
   };
 
   const disconnectWallet = async () => {
+    // Psuedo discconect. Just removes the current account from the active state
     setCurrentAccount("");
   };
 
   const updateCurrentNetwork = async (provider) => {
+    // Takes the metamask RPC endpoint provider object as parameter
+    // Asks metamask for the current network id, saves it to state.
     const { chainId } = await provider.getNetwork();
     setCurrentNetwork(chainId);
   };
 
   const promptSwitchToSmartChain = async () => {
+    // Tell metamask to prompt user to approve switch to Binance Smart Chain
     await window.ethereum.request({
       method: "wallet_switchEthereumChain",
       params: [{ chainId: hexValue(smartChainID) }],
     });
   };
 
+  // Log updated chain and add to state
   window.ethereum.on("chainChanged", (chainID) => {
     setCurrentNetwork(Number(chainID));
     console.log("Network Changed", Number(chainID));
@@ -93,12 +103,17 @@ const App = () => {
   });
 
   useEffect(() => {
+    // Run once on first render
     checkIfWalletIsConnected();
   }, []);
 
   useEffect(() => {
+    // Run when current account changes
+
     const provider = new ethers.providers.Web3Provider(window.ethereum);
+    // update provider if it's changed
     setProvider(provider);
+    // update network if changed
     updateCurrentNetwork(provider);
   }, [currentAccount, setCurrentAccount]);
 
