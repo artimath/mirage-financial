@@ -20,10 +20,29 @@
 - [x] Display USD value of underlying
 - [x] Display sum of these to approximate total value in LP.
 
+# Move api logic out of components and into an api
+
+# Add styling
+
+# Graphs
+
+# Historical Data
+
+# CSV Export
+
+# Connect to other vaults
+
+# Connect to other DEXs
+
+# Connect to other networks
+
+# Connect to all dApps on Ethereum chains
+
+# Tower where top is net worth, each block of the tower ties in with some part of the philosophy
+
 ## Bug Fixes
 
 - [ ] Ensure error boundary on missing metamask aka. missing window.ethereum
-- [ ] Move bsc api key into env and reset
 
 Knight LP
 https://bscscan.com/address/0xfc84b031a5221ced00b6470744af5e5da5710ddc#readContract
