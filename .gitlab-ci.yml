@@ -30,8 +30,8 @@ deploy-functions:
 prod-hosting:
   stage: deploy
   script:
-    - yarn
-    - yarn build
+    - npm i
+    - npm build
     - firebase deploy --only hosting --token $FIREBASE_TOKEN
   only:
     - master
