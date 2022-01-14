@@ -13,7 +13,6 @@ pre-branch-build:
       when: on_success
     - when: never
   script:
-    - npm i -g firebase-tools
     - node ./prebuild.mjs
   # the above script generates a build.env env file
   # the below artifact converts this build.env file to usable environment variables in CI
@@ -68,7 +67,7 @@ deploy-prod:
     - job: build
       artifacts: true
   script:
-    - ls
+    - ls -a
     - firebase deploy --only hosting
   environment:
     name: production
