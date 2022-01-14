@@ -27,6 +27,7 @@ build:
   stage: build
   script:
     # example build command, it should be whatever your project requires if it requires one
+    - npm i
     - npm run build
 
 deploy-branch:
