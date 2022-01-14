@@ -31,7 +31,7 @@ prod-hosting:
   stage: deploy
   script:
     - npm i
-    - npm build
+    - npm run build
     - firebase deploy --only hosting --token $FIREBASE_TOKEN
   only:
     - master
