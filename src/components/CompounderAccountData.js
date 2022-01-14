@@ -95,7 +95,7 @@ function CompounderAccountData(props) {
     getTotalSupplyOfLP(knightLPContract);
     getTokenSupply(knightLPContract);
     getAndSetTokenPrices(knightLPContract);
-  }, [provider]);
+  });
 
   return (
     <div>
