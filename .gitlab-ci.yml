@@ -3,37 +3,74 @@ image: node:17.3.0-alpine
 before_script:
   - npm i -g firebase-tools
 
-deploy-firestore:
-  stage: deploy
-  script:
-    - firebase deploy --only firestore --token $FIREBASE_TOKEN
-  only:
-    refs:
-      - master
-    changes:
-      - firebase-config/firestore.rules
-      - firebase-config/firestore.indexes.json
+stages:
+  - prebuild
+  - build
+  - deploy
 
-deploy-functions:
-  stage: deploy
+pre-branch-build:
+  stage: prebuild
+  rules:
+    # only run on branches as master deploys to production
+    - if: '$CI_COMMIT_BRANCH != "master"'
+      when: on_success
+    - when: never
   script:
-    - cd functions
-    - npm install
-    - cd ..
-    - firebase deploy --only functions --token $FIREBASE_TOKEN
-  only:
-    refs:
-      - master
-    changes:
-      - functions/**/*
+    - node ./prebuild.mjs
+  # the above script generates a build.env env file
+  # the below artifact converts this build.env file to usable environment variables in CI
+  artifacts:
+    reports:
+      dotenv: build.env
 
-prod-hosting:
-  stage: deploy
+build:
+  stage: build
   script:
-    - npm i
+    # example build command, it should be whatever your project requires if it requires one
     - npm run build
-    - firebase deploy --only hosting --token $FIREBASE_TOKEN
-  only:
-    - master
+
+deploy-branch:
+  stage: deploy
+  rules:
+    - if: '$CI_COMMIT_BRANCH != "master"'
+      when: on_success
+    - when: never
+  needs:
+    - job: build
+      artifacts: true
+    - job: pre-branch-build
+      artifacts: true
+  script:
+    - firebase hosting:channel:deploy $CI_COMMIT_REF_SLUG
+  environment:
+    name: review/$CI_COMMIT_REF_NAME
+    url: $MY_DEPLOYED_URL
+    on_stop: stop_branch
+
+stop_branch:
+  stage: deploy
+  rules:
+    - if: '$CI_COMMIT_BRANCH != "master"'
+      when: manual
+    - when: never
+  script:
+    - firebase hosting:channel:delete -f $CI_COMMIT_REF_SLUG
+  environment:
+    name: review/$CI_COMMIT_REF_NAME
+    action: stop
+
+deploy-prod:
+  stage: deploy
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master"'
+      when: on_success
+    - when: never
+  needs:
+    - job: build
+      artifacts: true
+  script:
+    - firebase deploy --only hosting
   environment:
     name: production
+    # change this to be your production url
+    # url: https://google.com
