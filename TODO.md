@@ -20,9 +20,9 @@
 - [x] Display USD value of underlying
 - [x] Display sum of these to approximate total value in LP.
 
-# Move api logic out of components and into an api
-
 # Add styling
+
+# Integrate firebase backend
 
 # Graphs
 

@@ -7,7 +7,6 @@ import {
   GUARDBUSD_AC_ABI,
   GUARDBUSD_AC_ADDRESS,
 } from "./contracts/utils/GuardBUSD-AC-Contract";
-import "./App.css";
 import { hexValue } from "ethers/lib/utils";
 
 const App = () => {
@@ -119,7 +118,7 @@ const App = () => {
 
   return (
     <div className="App">
-      <h1>Kings Armory</h1>
+      <h1 className="text-3xl font-bold underline">Initiated Finance: Tower</h1>
 
       <ConnectWallet
         currentAccount={currentAccount}

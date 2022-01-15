@@ -1,85 +1,125 @@
-image: node:17.3.0-alpine
-
-cache:
-  paths:
-    - node_modules/
-
-before_script:
-  - npm i -g firebase-tools
-
 stages:
-  - prebuild
+  - install
   - build
+  - test
   - deploy
 
-pre-branch-build:
-  stage: prebuild
-  rules:
-    # only run on branches as master deploys to production
-    - if: '$CI_COMMIT_BRANCH != "master"'
-      when: on_success
-    - when: never
+  
+
+install:
+  stage: install
+  image: node:14.9-alpine3.12
   script:
-    - node ./prebuild.mjs
-  # the above script generates a build.env env file
-  # the below artifact converts this build.env file to usable environment variables in CI
-  artifacts:
-    reports:
-      dotenv: build.env
+    - npm install
+  cache:
+    key:
+      files:
+        - package-lock.json
+    paths:
+      - node_modules/
 
 build:
   stage: build
+  image: node:14.9-alpine3.12
   script:
-    # example build command, it should be whatever your project requires if it requires one
-    - npm i
     - npm run build
+  needs: ["install"]
+  cache:
+    key:
+      files:
+        - package-lock.json
+    policy: pull
+    paths:
+      - node_modules/
   artifacts:
-    paths: 
-      - build/
+    expire_in: 1 week
+    paths:
+      - .firebaserc
+      - build
+      - firebase.json
 
-deploy-branch:
-  stage: deploy
-  rules:
-    - if: '$CI_COMMIT_BRANCH != "master"'
-      when: on_success
-    - when: never
-  needs:
-    - job: build
-      artifacts: true
-    - job: pre-branch-build
-      artifacts: true
+lint:
+  stage: test
+  image: node:14.9-alpine3.12
+  needs: ["install"]
+  cache:
+    key:
+      files:
+        - package-lock.json
+    policy: pull
+    paths:
+      - node_modules/
   script:
-    - firebase hosting:channel:deploy $CI_COMMIT_REF_SLUG --token $FIREBASE_TOKEN
+    - npm run lint
+
+test:
+  stage: test
+  image: node:14.9-alpine3.12
+  needs: ["install"]
+  cache:
+    key:
+      files:
+        - package-lock.json
+    policy: pull
+    paths:
+      - node_modules/
+  script:
+    - npm run test
+
+deploy:review:
+  image: andreysenov/firebase-tools:latest
+  stage: deploy
+  before_script:
+    - firebase use $ENVIRONMENT --token $FIREBASE_TOKEN
+  script:
+    - firebase hosting:channel:deploy $CI_ENVIRONMENT_SLUG --token $FIREBASE_TOKEN 
+    - echo "ENVIRONMENT_URL=$(firebase hosting:channel:open $CI_ENVIRONMENT_SLUG --non-interactive | awk '{ print $3 }')" >> deploy.env
   environment:
     name: review/$CI_COMMIT_REF_NAME
-    url: $MY_DEPLOYED_URL
-    on_stop: stop_branch
+    url: $ENVIRONMENT_URL
+  artifacts:
+    reports:
+      dotenv: deploy.env
+  dependencies:
+    - build
+  variables:
+    GIT_STRATEGY: none
+    ENVIRONMENT: staging
+  only:
+    - branches
+  except:
+    - master
 
-stop_branch:
+deploy:staging:
+  image: andreysenov/firebase-tools:latest
   stage: deploy
-  rules:
-    - if: '$CI_COMMIT_BRANCH != "master"'
-      when: manual
-    - when: never
+  before_script:
+    - firebase use $ENVIRONMENT
   script:
-    - firebase hosting:channel:delete -f $CI_COMMIT_REF_SLUG --token $FIREBASE_TOKEN
+    - firebase deploy
+        --token $FIREBASE_TOKEN
+        --message "Pipeline $CI_PIPELINE_ID, build $CI_BUILD_ID"
+        --non-interactive
+        --only hosting
+    - echo "ENVIRONMENT_URL=$(firebase hosting:channel:open live --non-interactive | awk '{ print $3 }')" >> deploy.env
   environment:
-    name: review/$CI_COMMIT_REF_NAME
-    action: stop
+    name: staging
+    url: $ENVIRONMENT_URL
+  artifacts:
+    reports:
+      dotenv: deploy.env
+  dependencies:
+    - build
+  variables:
+    GIT_STRATEGY: none
+    ENVIRONMENT: staging
+  only:
+    - master
 
-deploy-prod:
-  stage: deploy
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "master"'
-      when: on_success
-    - when: never
-  needs:
-    - job: build
-      artifacts: true
-  script:
-    - ls -a
-    - firebase deploy --only hosting --token $FIREBASE_TOKEN
+deploy:production:
+  extends: deploy:staging
   environment:
     name: production
-    # change this to be your production url
-    url: https://initiated-finance-tower.web.app/
+  variables:
+    ENVIRONMENT: production
+  when: manual

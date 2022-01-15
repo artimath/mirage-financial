@@ -1,5 +1,8 @@
 {
   "projects": {
-    "default": "initiated-finance-tower"
-  }
+    "default": "initiated-finance-tower",
+    "staging": "if-tower-staging",
+    "production": "initiated-finance-tower"
+  },
+  "targets": {}
 }
