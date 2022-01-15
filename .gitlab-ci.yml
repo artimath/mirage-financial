@@ -1,5 +1,9 @@
 image: node:17.3.0-alpine
 
+cache:
+  paths:
+    - node_modules/
+
 stages:
   - prebuild
   - build
@@ -24,8 +28,10 @@ build:
   stage: build
   script:
     # example build command, it should be whatever your project requires if it requires one
-    - npm i
     - npm run build
+  artifacts:
+    paths: 
+      - build/
 
 deploy-branch:
   stage: deploy
@@ -72,4 +78,4 @@ deploy-prod:
   environment:
     name: production
     # change this to be your production url
-    # url: https://google.com
+    url: https://initiated-finance-tower.web.app/
