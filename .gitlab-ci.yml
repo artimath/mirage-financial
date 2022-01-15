@@ -4,6 +4,9 @@ cache:
   paths:
     - node_modules/
 
+before_script:
+  - npm i -g firebase-tools
+
 stages:
   - prebuild
   - build
@@ -46,7 +49,7 @@ deploy-branch:
     - job: pre-branch-build
       artifacts: true
   script:
-    - firebase hosting:channel:deploy $CI_COMMIT_REF_SLUG
+    - firebase hosting:channel:deploy $CI_COMMIT_REF_SLUG --token $FIREBASE_TOKEN
   environment:
     name: review/$CI_COMMIT_REF_NAME
     url: $MY_DEPLOYED_URL
@@ -59,7 +62,7 @@ stop_branch:
       when: manual
     - when: never
   script:
-    - firebase hosting:channel:delete -f $CI_COMMIT_REF_SLUG
+    - firebase hosting:channel:delete -f $CI_COMMIT_REF_SLUG --token $FIREBASE_TOKEN
   environment:
     name: review/$CI_COMMIT_REF_NAME
     action: stop
@@ -75,7 +78,7 @@ deploy-prod:
       artifacts: true
   script:
     - ls -a
-    - firebase deploy --only hosting
+    - firebase deploy --only hosting --token $FIREBASE_TOKEN
   environment:
     name: production
     # change this to be your production url
