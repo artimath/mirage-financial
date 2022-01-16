@@ -1,3 +1,16 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer components {
+  .connectButton {
+    @apply rounded-xl px-3;
+  }
+  .connected {
+    @apply bg-gray-400 text-black hover:bg-gray-100;
+  }
+
+  .disconnected {
+    @apply bg-gray-700 font-bold hover:bg-gray-500;
+  }
+}
