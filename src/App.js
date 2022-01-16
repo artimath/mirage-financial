@@ -169,7 +169,7 @@ const App = () => {
             </div>
           </nav>
 
-          <section>
+          <section className="w-full">
             <div
               id="main"
               className="main-content flex-1 bg-gray-100 mt-12 md:mt-2 pb-24 md:pb-5 font-black"
@@ -183,6 +183,7 @@ const App = () => {
               <AccountInfo
                 currentAccount={currentAccount}
                 currentNetwork={currentNetwork}
+                connectWallet={connectWallet}
                 promptSwitchToSmartChain={promptSwitchToSmartChain}
               />
               {/* <div className="px-6 pt-6">
@@ -190,11 +191,13 @@ const App = () => {
                   <h1 className=" text-2xl">Guard/BUSD Vault</h1>
                 </div>
               </div> */}
-              <CompounderAccountData
-                contract={guardBusdContract}
-                walletAddress={currentAccount}
-                provider={provider}
-              />
+              {currentAccount && (
+                <CompounderAccountData
+                  contract={guardBusdContract}
+                  walletAddress={currentAccount}
+                  provider={provider}
+                />
+              )}
             </div>
           </section>
         </div>
