@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+
 import { ConnectWallet } from "./components/ConnectWallet";
 import AccountInfo from "./components/AccountInfo";
 import CompounderAccountData from "./components/CompounderAccountData";
@@ -8,6 +10,7 @@ import {
   GUARDBUSD_AC_ADDRESS,
 } from "./contracts/utils/GuardBUSD-AC-Contract";
 import { hexValue } from "ethers/lib/utils";
+import { faGopuram, faWallet } from "@fortawesome/free-solid-svg-icons";
 
 const App = () => {
   const [currentAccount, setCurrentAccount] = useState();
@@ -117,15 +120,31 @@ const App = () => {
   }, [currentAccount, setCurrentAccount]);
 
   return (
-    <div className="App">
-      <h1 className="text-3xl font-bold underline">Initiated Finance: Tower</h1>
+    <div className="App bg-gray-800 font-sans leading-normal tracking-normal mt-9 text-white">
+      <header>
+        <nav className=" bg-gray-700 pt-2 md:pt-1 pb-1 px-1 mt-0 h-auto fixed w-full z-20 top-0">
+          <div className=" flex flex-wrap items-center ">
+            <div className="flex flex-shrink w-1/2 md:w-1/3 justify-start text-white ">
+              <a href="#" aria-label="Home">
+                <span className=" text-xl pl-2">
+                  <FontAwesomeIcon icon={faGopuram} />
+                </span>
+              </a>
+            </div>
+            <div className="md:flex md:flex-shrink hidden md:w-1/3 justify-center">
+              <h1>initiated.finance</h1>
+            </div>
+            <div className="flex flex-shrink w-1/2 md:w-1/3 justify-end">
+              <ConnectWallet
+                currentAccount={currentAccount}
+                connectWallet={connectWallet}
+                disconnectWallet={disconnectWallet}
+              />
+            </div>
+          </div>
+        </nav>
+      </header>
 
-      <ConnectWallet
-        currentAccount={currentAccount}
-        connectWallet={connectWallet}
-        disconnectWallet={disconnectWallet}
-      />
-      <hr />
       <AccountInfo
         currentAccount={currentAccount}
         currentNetwork={currentNetwork}
