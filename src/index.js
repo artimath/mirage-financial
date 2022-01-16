@@ -4,9 +4,15 @@ import "./index.css";
 import App from "./App";
 
 import { library } from "@fortawesome/fontawesome-svg-core";
-import { faGopuram, faWallet } from "@fortawesome/free-solid-svg-icons";
+import {
+  faGopuram,
+  faHandHoldingUsd,
+  faLink,
+  faShieldAlt,
+  faWallet,
+} from "@fortawesome/free-solid-svg-icons";
 
-library.add(faGopuram, faWallet);
+library.add(faGopuram, faWallet, faLink, faShieldAlt, faHandHoldingUsd);
 
 ReactDOM.render(
   <React.StrictMode>
