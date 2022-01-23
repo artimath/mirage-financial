@@ -1,10 +1,16 @@
-import React from "react";
+import React, { useContext } from "react";
 import { useState, useEffect } from "react";
 import { ethers } from "ethers";
 import {
   KNIGHT_LP_ABI,
   KNIGHT_LP_ADDRESS,
 } from "../contracts/utils/KnightLPPool-Config";
+import {
+  GUARDBUSD_AC_ABI,
+  GUARDBUSD_AC_ADDRESS,
+} from "../contracts/utils/GuardBUSD-AC-Contract";
+import { WalletContext } from "../contexts/WalletContext";
+
 const formatEther = ethers.utils.formatEther;
 
 const roundToDecimal = (num, place) => {
@@ -12,12 +18,19 @@ const roundToDecimal = (num, place) => {
   return rounded;
 };
 
-function CompounderAccountData(props) {
-  const { walletAddress, contract, provider } = props;
+function CompounderAccountData() {
+  const [walletState] = useContext(WalletContext);
+  const walletAddress = walletState.currentAccount;
 
   const [balance, setBalance] = useState(0);
   const [sharePrice, setSharePrice] = useState(0);
   const [walletLP, setWalletLP] = useState(0);
+
+  const guardBusdContract = new ethers.Contract(
+    GUARDBUSD_AC_ADDRESS,
+    GUARDBUSD_AC_ABI,
+    walletState.provider
+  );
 
   // Functions to pull data from GuardBUSD-AC-Contract
   const getBalanceOf = async (walletAddress, contract) => {
@@ -31,14 +44,13 @@ function CompounderAccountData(props) {
   };
 
   useEffect(() => {
-    getBalanceOf(walletAddress, contract);
-    getPricePerShare(contract);
-    console.log("WalletLP is ", walletLP);
-  }, [walletAddress, contract, walletLP]);
+    getBalanceOf(walletAddress, guardBusdContract);
+    getPricePerShare(guardBusdContract);
+  });
 
   useEffect(() => {
     setWalletLP(balance * sharePrice);
-  }, [balance, setBalance, walletLP, setWalletLP, sharePrice]);
+  }, [balance, setWalletLP, sharePrice]);
 
   // Functions to pull data from Knight LP Pool
   const [totalSupplyOfLP, setTotalSupplyOfLP] = useState(0);
@@ -54,7 +66,7 @@ function CompounderAccountData(props) {
 
   const getTokenSupply = async (contract) => {
     const res = await contract.getReserves();
-    console.log(res);
+
     setToken0Supply(formatEther(res["_reserve0"]));
     setToken1Supply(formatEther(res["_reserve1"]));
   };
@@ -63,15 +75,14 @@ function CompounderAccountData(props) {
     const api_url = `https://api.coingecko.com/api/v3/simple/token_price/binance-smart-chain?contract_addresses=${tokenAddress}&vs_currencies=USD`;
 
     // TODO: Get the token price fetch to return correctly.
-    console.log(api_url);
+
     try {
       const res = await fetch(api_url);
-      console.log(res);
+
       const json = await res.json();
-      console.log(json);
-      console.log(tokenAddress);
+
       const price = Object.values(json)[0]["usd"];
-      console.log(price);
+
       return price;
     } catch (error) {
       console.error("Failed during fetch", error);
@@ -90,7 +101,7 @@ function CompounderAccountData(props) {
     const knightLPContract = new ethers.Contract(
       KNIGHT_LP_ADDRESS,
       KNIGHT_LP_ABI,
-      provider
+      walletState.provider
     );
     getTotalSupplyOfLP(knightLPContract);
     getTokenSupply(knightLPContract);
