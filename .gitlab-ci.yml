@@ -4,6 +4,8 @@ stages:
   - test
   - deploy
 
+before_script:
+  - cd client
   
 
 install:
@@ -34,9 +36,9 @@ build:
   artifacts:
     expire_in: 1 week
     paths:
-      - .firebaserc
-      - build
-      - firebase.json
+      - client/.firebaserc
+      - client/build
+      - client/firebase.json
 
 lint:
   stage: test
@@ -70,6 +72,7 @@ deploy:review:
   image: andreysenov/firebase-tools:latest
   stage: deploy
   before_script:
+    - cd client
     - firebase use $ENVIRONMENT --token $FIREBASE_TOKEN
   script:
     - firebase hosting:channel:deploy $CI_ENVIRONMENT_SLUG --token $FIREBASE_TOKEN 
