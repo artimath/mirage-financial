@@ -1,7 +1,11 @@
 import { useContext, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Link, NavLink, Outlet } from "react-router-dom";
-import { faEye, faGopuram } from "@fortawesome/free-solid-svg-icons";
+import {
+  faChartLine,
+  faEye,
+  faGopuram,
+} from "@fortawesome/free-solid-svg-icons";
 import { ethers } from "ethers";
 
 import { ConnectWallet } from "./components/ConnectWallet";
@@ -119,6 +123,17 @@ const App = () => {
                       </span>
                       <span className="pb-1 md:pb-0 text-xs md:text-base text-gray-400 md:text-gray-200 block md:inline-block">
                         Portfolio
+                      </span>
+                    </NavLink>
+                    <NavLink
+                      to="/vault-history"
+                      className="block py-1 md:py-3 pl-1 align-middle text-white no-underline hover:text-white border-b-2 border-gray-800 hover:border-pink-500"
+                    >
+                      <span className="pr-0 md:pr-3">
+                        <FontAwesomeIcon icon={faChartLine} size="2x" />
+                      </span>
+                      <span className="pb-1 md:pb-0 text-xs md:text-base text-gray-400 md:text-gray-200 block md:inline-block">
+                        History
                       </span>
                     </NavLink>
                   </li>

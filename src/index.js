@@ -6,6 +6,7 @@ import App from "./App";
 import Portfolio from "./routes/Portfolio";
 import { WalletProvider } from "./contexts/WalletContext";
 import Home from "./routes/Home";
+import History from "./routes/History";
 
 // Don't think we need this icon import here, but leaving it for now until sure
 
@@ -28,6 +29,7 @@ ReactDOM.render(
           <Route path="/" element={<App />}>
             <Route index element={<Home />} />
             <Route path="portfolio" element={<Portfolio />} />
+            <Route path="vault-history" element={<History />} />
           </Route>
         </Routes>
       </WalletProvider>

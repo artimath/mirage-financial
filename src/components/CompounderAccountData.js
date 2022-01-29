@@ -1,6 +1,8 @@
 import React, { useContext } from "react";
 import { useState, useEffect } from "react";
 import { ethers } from "ethers";
+import { doc, getDoc, setDoc } from "firebase/firestore";
+import { DateTime, Interval } from "luxon";
 import {
   KNIGHT_LP_ABI,
   KNIGHT_LP_ADDRESS,
@@ -10,6 +12,11 @@ import {
   GUARDBUSD_AC_ADDRESS,
 } from "../contracts/utils/GuardBUSD-AC-Contract";
 import { WalletContext } from "../contexts/WalletContext";
+import { firestore } from "../firebase";
+
+// TODO
+// Need to fix sendin firestore the value of vault when it hasn't fully calculated yet. Need to check that there is balance in both token holdings.
+// Also fix tests
 
 const formatEther = ethers.utils.formatEther;
 
@@ -58,6 +65,7 @@ function CompounderAccountData() {
   const [token1Supply, setToken1Supply] = useState(0);
   const [token0Price, setToken0Price] = useState(0);
   const [token1Price, setToken1Price] = useState(0);
+  const [currentValueOfVault, setCurrentValueOfVault] = useState();
 
   const getTotalSupplyOfLP = async (contract) => {
     const res = await contract.totalSupply();
@@ -107,6 +115,95 @@ function CompounderAccountData() {
     getTokenSupply(knightLPContract);
     getAndSetTokenPrices(knightLPContract);
   });
+
+  const addVaultBalanceToDatabase = async (data) => {
+    const vaultRef = doc(
+      firestore,
+      `users/${walletState.currentAccount}/vault_holdings`,
+      GUARDBUSD_AC_ADDRESS
+    );
+    const vaultSnap = await getDoc(vaultRef);
+
+    if (vaultSnap.exists()) {
+      console.log("Document data:", vaultSnap.data());
+      const lastUpdatedAt = vaultSnap.data().last_updated.toDate();
+      const lastUpdatedDateTime = DateTime.fromJSDate(lastUpdatedAt);
+      const now = DateTime.now();
+
+      const interval = Interval.fromDateTimes(lastUpdatedDateTime, now);
+
+      const hoursSinceUpdate = interval.length("hours");
+
+      if (hoursSinceUpdate > 24) {
+        // If been over a day, then update
+
+        const pastVaultData = vaultSnap.data().balanceData;
+
+        const vaultDateData = {
+          date: new Date(),
+          balance: currentValueOfVault,
+        };
+
+        const data = {
+          last_updated: new Date(),
+          balanceData: [...pastVaultData, vaultDateData],
+        };
+
+        setDoc(vaultRef, data, { merge: true });
+        console.log("Added to firestore");
+      } else {
+        console.log("Already updated in last 24 hours.");
+      }
+    } else {
+      console.log("No Such Document, Adding Now");
+
+      const vaultDateData = {
+        date: new Date(),
+        balance: currentValueOfVault,
+      };
+
+      const data = {
+        last_updated: new Date(),
+        balanceData: [vaultDateData],
+      };
+
+      setDoc(vaultRef, data);
+      console.log("Added to firestore");
+    }
+  };
+
+  useEffect(() => {
+    const valueOfVault =
+      token1Supply * (walletLP / totalSupplyOfLP) * token1Price +
+      token0Supply * (walletLP / totalSupplyOfLP) * token0Price;
+    console.log("vault value: ", valueOfVault);
+    setCurrentValueOfVault(roundToDecimal(valueOfVault, 2));
+
+    if (currentValueOfVault && currentValueOfVault > 0) {
+      const vaultDateData = {
+        balanceData: [{ date: new Date(), balance: currentValueOfVault }],
+      };
+
+      const data = {
+        last_updated: new Date(),
+        balanceData: vaultDateData,
+      };
+
+      try {
+        addVaultBalanceToDatabase(data);
+      } catch (error) {
+        console.error(error.message);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    token0Price,
+    token0Supply,
+    token1Price,
+    token1Supply,
+    totalSupplyOfLP,
+    walletLP,
+  ]);
 
   return (
     <div className="flex flex-wrap">
@@ -229,11 +326,7 @@ function CompounderAccountData() {
                   Total Value of Holdings
                 </h2>
                 <p className="font-bold text-xl">
-                  {roundToDecimal(
-                    token1Supply * (walletLP / totalSupplyOfLP) * token1Price +
-                      token0Supply * (walletLP / totalSupplyOfLP) * token0Price,
-                    2
-                  )}
+                  {roundToDecimal(currentValueOfVault, 2)}
                   <span> USD</span>
                 </p>
               </div>
