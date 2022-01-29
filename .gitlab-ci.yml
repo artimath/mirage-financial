@@ -97,6 +97,7 @@ deploy:staging:
   image: andreysenov/firebase-tools:latest
   stage: deploy
   before_script:
+    - cd client
     - firebase use $ENVIRONMENT
   script:
     - firebase deploy
