@@ -1,0 +1,14 @@
+{
+  "name": "initiated_finance_api",
+  "version": "0.0.1",
+  "description": "Api for decentralized tower app",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "firebase": "^9.4.1"
+  }
+}
