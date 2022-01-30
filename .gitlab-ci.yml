@@ -16,9 +16,9 @@ install:
   cache:
     key:
       files:
-        - package-lock.json
+        - client/package-lock.json
     paths:
-      - node_modules/
+      - client/node_modules/
 
 build:
   stage: build
@@ -29,10 +29,10 @@ build:
   cache:
     key:
       files:
-        - package-lock.json
+        - client/package-lock.json
     policy: pull
     paths:
-      - node_modules/
+      - client/node_modules/
   artifacts:
     expire_in: 1 week
     paths:
@@ -47,10 +47,10 @@ lint:
   cache:
     key:
       files:
-        - package-lock.json
+        - client/package-lock.json
     policy: pull
     paths:
-      - node_modules/
+      - client/node_modules/
   script:
     - npm run lint
 
@@ -61,10 +61,10 @@ test:
   cache:
     key:
       files:
-        - package-lock.json
+        - client/package-lock.json
     policy: pull
     paths:
-      - node_modules/
+      - client/node_modules/
   script:
     - npm run test
 
