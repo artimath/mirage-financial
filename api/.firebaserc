@@ -1,6 +1,6 @@
 {
   "projects": {
-    "default": "initiated-finance-tower",
+    "default": "if-tower-staging",
     "staging": "if-tower-staging",
     "production": "initiated-finance-tower"
   },

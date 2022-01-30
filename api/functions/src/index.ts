@@ -1,4 +1,5 @@
 import * as functions from "firebase-functions";
+import * as express from "express";
 
 // // Start writing Firebase Functions
 // // https://firebase.google.com/docs/functions/typescript
@@ -8,13 +9,6 @@ import * as functions from "firebase-functions";
 //   response.send("Hello from Firebase!");
 // });
 
-const admin = require("firebase-admin");
-admin.initializeApp();
-
-exports.addMessage = functions.https.onRequest(async (req, res) => {
-  const original = req.query.text;
-  const writeResult = await admin
-    .firestore()
-    .collection("messages")
-    .add({ original: original });
-});
+const app = express();
+app.get("/", (req, res) => res.status(200).send("Hey there!"));
+exports.app = functions.https.onRequest(app);
