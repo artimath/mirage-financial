@@ -24,6 +24,19 @@ export const ConnectWallet = () => {
             method: "eth_requestAccounts",
           });
 
+          // Ping database to see if wallet is created or not.
+          try {
+            const response = await fetch(
+              `http://localhost:5001/if-tower-staging/us-central1/app/user_wallets/${accounts[0]}`
+            );
+
+            const json = await response.json;
+
+            console.log(json);
+          } catch (error) {
+            console.error(error);
+          }
+
           setWalletState((state) => ({
             ...state,
             currentAccount: accounts[0],

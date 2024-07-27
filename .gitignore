@@ -26,3 +26,5 @@ yarn-error.log*
 TODO.md
 
 
+api/functions/.runtimeconfig.json
+.aider*

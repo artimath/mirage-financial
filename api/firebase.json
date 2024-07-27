@@ -19,6 +19,9 @@
     },
     "ui": {
       "enabled": true
+    },
+    "hosting": {
+      "port": 5000
     }
   }
 }
